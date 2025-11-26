@@ -1,0 +1,334 @@
+{
+  "Budapest, Dózsa György út 108": {
+    "lat": 47.942754263688684,
+    "lng": 17.21449148056994
+  },
+  "Budapest, Móra Ferenc utca 31": {
+    "lat": 47.95268748983778,
+    "lng": 17.44128819867828
+  },
+  "Budapest, Jókai utca 45": {
+    "lat": 47.89481292003367,
+    "lng": 17.4852938323832
+  },
+  "Budapest, Erkel Ferenc utca 59": {
+    "lat": 47.9861352469849,
+    "lng": 17.15364713752444
+  },
+  "Budapest, Rákóczi út 120": {
+    "lat": 47.90385600898907,
+    "lng": 17.14546258697877
+  },
+  "Budapest, Móra Ferenc utca 71": {
+    "lat": 47.9646166457189,
+    "lng": 17.220040011070363
+  },
+  "Budapest, Bajcsy utca 101": {
+    "lat": 47.912379657444845,
+    "lng": 17.073160472345247
+  },
+  "Budapest, Móra Ferenc utca 55": {
+    "lat": 47.98506771157695,
+    "lng": 17.140956343833473
+  },
+  "Budapest, Széchenyi tér 117": {
+    "lat": 47.691199505674504,
+    "lng": 17.142245449680875
+  },
+  "Budapest, Fő utca 37": {
+    "lat": 47.871488950419185,
+    "lng": 16.969494705024232
+  },
+  "Budapest, Ady Endre utca 100": {
+    "lat": 47.74840971070524,
+    "lng": 17.090168956607485
+  },
+  "Budapest, Hunyadi utca 42": {
+    "lat": 47.747168595457204,
+    "lng": 16.94151937663754
+  },
+  "Budapest, Liszt Ferenc tér 149": {
+    "lat": 47.72840465320897,
+    "lng": 17.246899804470466
+  },
+  "Budapest, Petőfi utca 111": {
+    "lat": 47.52525568964153,
+    "lng": 17.04259759906524
+  },
+  "Budapest, Dózsa György út 25": {
+    "lat": 47.60667392519477,
+    "lng": 17.083767359829086
+  },
+  "Budapest, Petőfi utca 122": {
+    "lat": 47.60913083341807,
+    "lng": 17.31628647899687
+  },
+  "Budapest, Széchenyi tér 60": {
+    "lat": 47.73601016412314,
+    "lng": 17.281645469922474
+  },
+  "Budapest, Liszt Ferenc tér 131": {
+    "lat": 47.49734725859941,
+    "lng": 17.294154872005702
+  },
+  "Budapest, Rákóczi út 42": {
+    "lat": 47.63994264770941,
+    "lng": 17.401158441987523
+  },
+  "Budapest, Hunyadi utca 82": {
+    "lat": 47.59359413611441,
+    "lng": 17.372438210864363
+  },
+  "Budapest, Kinizsi utca 9": {
+    "lat": 47.70752095345757,
+    "lng": 17.428309502619484
+  },
+  "Budapest, Katona József utca 13": {
+    "lat": 47.81954919141679,
+    "lng": 17.49558413172939
+  },
+  "Budapest, Móra Ferenc utca 62": {
+    "lat": 47.78607104524695,
+    "lng": 17.387613286661942
+  },
+  "Budapest, Arany János utca 127": {
+    "lat": 47.68842506141661,
+    "lng": 17.533584947405405
+  },
+  "Budapest, Kossuth utca 50": {
+    "lat": 47.757719113901935,
+    "lng": 17.311638084427877
+  },
+  "Budapest, Vörösmarty utca 49": {
+    "lat": 47.68026118389836,
+    "lng": 17.608744706671796
+  },
+  "Budapest, Móra Ferenc utca 11": {
+    "lat": 47.74973594608938,
+    "lng": 17.411367665951502
+  },
+  "Budapest, Vörösmarty utca 31": {
+    "lat": 47.79543136112447,
+    "lng": 17.479616841533847
+  },
+  "Budapest, Kinizsi utca 142": {
+    "lat": 47.41257756718314,
+    "lng": 17.126525233117903
+  },
+  "Budapest, Bem tér 103": {
+    "lat": 47.39501093196759,
+    "lng": 17.13792856962295
+  },
+  "Budapest, Dózsa György út 103": {
+    "lat": 47.282447704656164,
+    "lng": 17.085883361719784
+  },
+  "Budapest, Petőfi utca 24": {
+    "lat": 47.342379242727354,
+    "lng": 17.290098059074346
+  },
+  "Budapest, Fő utca 53": {
+    "lat": 47.33558447796831,
+    "lng": 17.26930624147852
+  },
+  "Budapest, Jókai utca 47": {
+    "lat": 47.30152006474055,
+    "lng": 16.983962870385675
+  },
+  "Budapest, Dózsa György út 124": {
+    "lat": 47.565446871670105,
+    "lng": 17.530634564960522
+  },
+  "Budapest, Kinizsi utca 35": {
+    "lat": 47.28655618135868,
+    "lng": 17.518862872052324
+  },
+  "Budapest, Petőfi utca 74": {
+    "lat": 47.467605526512564,
+    "lng": 17.494410086280915
+  },
+  "Budapest, Kinizsi utca 78": {
+    "lat": 47.33398715663502,
+    "lng": 17.577615065596515
+  },
+  "Budapest, Hunyadi utca 89": {
+    "lat": 47.25687937318182,
+    "lng": 17.624343062894315
+  },
+  "Budapest, Deák Ferenc utca 132": {
+    "lat": 47.39927051522859,
+    "lng": 17.514424348387607
+  },
+  "Budapest, Erkel Ferenc utca 58": {
+    "lat": 47.62253829708918,
+    "lng": 17.736780035039313
+  },
+  "Budapest, Szabadság tér 57": {
+    "lat": 47.705513283939325,
+    "lng": 17.748293039875833
+  },
+  "Budapest, Liszt Ferenc tér 141": {
+    "lat": 47.73702955135742,
+    "lng": 17.639968696763525
+  },
+  "Budapest, Bem tér 49": {
+    "lat": 47.67033425993808,
+    "lng": 17.84860249744337
+  },
+  "Budapest, Kossuth utca 54": {
+    "lat": 47.82834670411873,
+    "lng": 17.784002133155216
+  },
+  "Budapest, Liszt Ferenc tér 102": {
+    "lat": 47.61780742041806,
+    "lng": 17.963037913077684
+  },
+  "Budapest, Bajcsy utca 8": {
+    "lat": 47.64366569760557,
+    "lng": 18.055586456548493
+  },
+  "Budapest, Vörösmarty utca 22": {
+    "lat": 47.662092025258715,
+    "lng": 17.907458414856546
+  },
+  "Budapest, Vörösmarty utca 109": {
+    "lat": 47.797301237536274,
+    "lng": 17.989469075914844
+  },
+  "Budapest, Móra Ferenc utca 30": {
+    "lat": 47.57910651051117,
+    "lng": 18.047215781900317
+  },
+  "Budapest, Vörösmarty utca 14": {
+    "lat": 47.510242048937414,
+    "lng": 17.77940194531698
+  },
+  "Budapest, Kinizsi utca 95": {
+    "lat": 47.446189734711844,
+    "lng": 17.698248420147515
+  },
+  "Budapest, Széchenyi tér 96": {
+    "lat": 47.41339998372269,
+    "lng": 17.761759820838623
+  },
+  "Budapest, Bajcsy utca 105": {
+    "lat": 47.2676450424867,
+    "lng": 17.68887958905867
+  },
+  "Budapest, Móra Ferenc utca 97": {
+    "lat": 47.272896951519705,
+    "lng": 17.6921171703254
+  },
+  "Budapest, Deák Ferenc utca 88": {
+    "lat": 47.48063064110528,
+    "lng": 17.9500880271925
+  },
+  "Budapest, Katona József utca 28": {
+    "lat": 47.38319557896764,
+    "lng": 17.840332352430508
+  },
+  "Budapest, Kinizsi utca 114": {
+    "lat": 47.375913761104016,
+    "lng": 17.89271583268536
+  },
+  "Budapest, Petőfi utca 128": {
+    "lat": 47.54287979481502,
+    "lng": 17.932041227866094
+  },
+  "Budapest, Rákóczi út 63": {
+    "lat": 47.40500285771076,
+    "lng": 17.859838862211017
+  },
+  "Budapest, Arany János utca 63": {
+    "lat": 47.34222756982902,
+    "lng": 18.073426119016464
+  },
+  "Budapest, Szabadság tér 6": {
+    "lat": 47.16142592842417,
+    "lng": 17.954479917168264
+  },
+  "Budapest, Arany János utca 57": {
+    "lat": 47.196354336277444,
+    "lng": 17.911689625427112
+  },
+  "Budapest, Liszt Ferenc tér 119": {
+    "lat": 47.16846205566666,
+    "lng": 17.827452446575254
+  },
+  "Budapest, Jókai utca 13": {
+    "lat": 47.21339345916227,
+    "lng": 17.9042403174089
+  },
+  "Budapest, Bajcsy utca 43": {
+    "lat": 47.3495724572929,
+    "lng": 17.901976795612214
+  },
+  "Budapest, Erkel Ferenc utca 89": {
+    "lat": 47.71910744573363,
+    "lng": 16.674072125010333
+  },
+  "Budapest, Dózsa György út 7": {
+    "lat": 47.708067138328076,
+    "lng": 16.867754410369848
+  },
+  "Budapest, Katona József utca 68": {
+    "lat": 47.650804170523294,
+    "lng": 16.55136765011695
+  },
+  "Budapest, Vörösmarty utca 139": {
+    "lat": 47.67736088017437,
+    "lng": 16.86969559254021
+  },
+  "Budapest, Arany János utca 19": {
+    "lat": 47.64548099247109,
+    "lng": 16.70266720500229
+  },
+  "Budapest, Bem tér 70": {
+    "lat": 47.4697713856397,
+    "lng": 16.531016622167616
+  },
+  "Budapest, Kinizsi utca 2": {
+    "lat": 47.59324799373923,
+    "lng": 16.533955615246025
+  },
+  "Budapest, Vörösmarty utca 72": {
+    "lat": 47.45737004583465,
+    "lng": 16.486474323055038
+  },
+  "Budapest, Erkel Ferenc utca 29": {
+    "lat": 47.62335084699665,
+    "lng": 16.588854588508255
+  },
+  "Budapest, Erkel Ferenc utca 126": {
+    "lat": 47.64094407080147,
+    "lng": 16.57392367358788
+  },
+  "Budapest, Liszt Ferenc tér 81": {
+    "lat": 47.24233950651696,
+    "lng": 16.583365137002374
+  },
+  "Budapest, Liszt Ferenc tér 111": {
+    "lat": 47.409299826566034,
+    "lng": 16.59290372233165
+  },
+  "Budapest, Dózsa György út 72": {
+    "lat": 47.41681795314656,
+    "lng": 16.736821885575218
+  },
+  "Budapest, Ady Endre utca 122": {
+    "lat": 47.22482859319766,
+    "lng": 16.61096863200773
+  },
+  "Budapest, Liszt Ferenc tér 119/E": {
+    "lat": 47.23505594525007,
+    "lng": 16.538682263226285
+  },
+  "Budapest, Erkel Ferenc utca 112": {
+    "lat": 47.29408990660339,
+    "lng": 16.918939618881474
+  },
+  "Budapest, Jókai utca 1": {
+    "lat": 47.34151443354778,
+    "lng": 16.543957389947213
+  }
+}
