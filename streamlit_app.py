@@ -13,31 +13,90 @@ st.set_page_config(
     layout="wide"
 )
 
-# Load GeoJSON files
+# Load ALL GeoJSON files
 @st.cache_data
-def load_zone_data():
+def load_all_data():
+    '''Load regions, branches, and technical zones'''
+    data = {}
+    
+    # Load regions
+    try:
+        with open("regions.geojson", "r", encoding="utf-8") as f:
+            data['regions'] = json.load(f)
+    except FileNotFoundError:
+        st.warning("⚠️ regions.geojson not found")
+        data['regions'] = None
+    
+    # Load branches
+    try:
+        with open("branches.geojson", "r", encoding="utf-8") as f:
+            data['branches'] = json.load(f)
+    except FileNotFoundError:
+        st.warning("⚠️ branches.geojson not found")
+        data['branches'] = None
+    
+    # Load technical zones
     try:
         with open("technical_zones.geojson", "r", encoding="utf-8") as f:
-            zones_data = json.load(f)
-        return zones_data
+            data['zones'] = json.load(f)
     except FileNotFoundError:
-        st.error("❌ technical_zones.geojson file not found!")
-        return None
+        st.error("❌ technical_zones.geojson not found!")
+        data['zones'] = None
+    
+    return data
 
-# Zone detection function
+# Helper function: Find which region a point is in
+def find_region_for_point(lat, lng, regions_data):
+    '''Find which region contains the point'''
+    if not regions_data:
+        return None
+    
+    point = Point(lng, lat)
+    
+    for feature in regions_data["features"]:
+        polygon = shape(feature["geometry"])
+        if polygon.contains(point):
+            return {
+                "region_id": feature["properties"].get("region_id"),
+                "region_name": feature["properties"].get("region_name")
+            }
+    return None
+
+# Helper function: Find which branch a point is in
+def find_branch_for_point(lat, lng, branches_data):
+    '''Find which branch contains the point'''
+    if not branches_data:
+        return None
+    
+    point = Point(lng, lat)
+    
+    for feature in branches_data["features"]:
+        polygon = shape(feature["geometry"])
+        if polygon.contains(point):
+            return {
+                "branch_id": feature["properties"].get("branch_id"),
+                "branch_name": feature["properties"].get("branch_name"),
+                "region_id": feature["properties"].get("region_id")
+            }
+    return None
+
+# Zone detection function - HANDLES HUNGARIAN FIELD NAMES
 def find_zone_for_point(lat, lng, zones_data):
     '''Find which zone contains the point, or find nearest zone'''
-    point = Point(lng, lat)  # Shapely uses (lng, lat)
+    point = Point(lng, lat)
     
     # Step 1: Check if point is inside any zone
     for feature in zones_data["features"]:
         polygon = shape(feature["geometry"])
         
         if polygon.contains(point):
+            props = feature["properties"]
             return {
-                "zone_id": feature["properties"].get("zone_id"),
-                "zone_name": feature["properties"].get("zone_name"),
-                "basis_id": feature["properties"].get("basis_id"),
+                "zone_id": props.get("bázis_id") or props.get("zone_id"),  # Support both names
+                "zone_name": props.get("bázis_név") or props.get("zone_name"),
+                "region_name": props.get("Régió"),
+                "created_by": props.get("created_by"),
+                "status": props.get("status"),
                 "method": "inside",
                 "confidence": "high"
             }
@@ -55,32 +114,32 @@ def find_zone_for_point(lat, lng, zones_data):
             min_distance = distance
             nearest_zone = feature
     
-    # Convert distance to kilometers (approximate for Hungary)
+    # Convert distance to kilometers
     distance_km = min_distance * 85
     
+    props = nearest_zone["properties"]
     return {
-        "zone_id": nearest_zone["properties"].get("zone_id"),
-        "zone_name": nearest_zone["properties"].get("zone_name"),
-        "basis_id": nearest_zone["properties"].get("basis_id"),
+        "zone_id": props.get("bázis_id") or props.get("zone_id"),
+        "zone_name": props.get("bázis_név") or props.get("zone_name"),
+        "region_name": props.get("Régió"),
+        "created_by": props.get("created_by"),
+        "status": props.get("status"),
         "method": "nearest",
         "confidence": "low",
         "distance_km": round(distance_km, 2)
     }
 
-# Mock addresses for reliable demos
+# Mock addresses for demos
 MOCK_ADDRESSES = {
     "Debrecen, Piac utca 1": {"lat": 47.5316, "lng": 21.6273},
-    "Debrecen, Bem tér 1": {"lat": 47.5287, "lng": 21.6389},
-    "Debrecen, Kossuth utca 5": {"lat": 47.5301, "lng": 21.6250},
-    "Debrecen, Hatvan utca 10": {"lat": 47.525, "lng": 21.620},
-    "Beled, Füzes utca 12": {"lat": 47.591, "lng": 17.123},
-    "Győr, Taligás utca 22": {"lat": 47.688, "lng": 17.635},
+    "Fertőd, Fő utca 1": {"lat": 47.622, "lng": 16.864},
+    "Csorna, Kossuth utca 5": {"lat": 47.612, "lng": 17.253},
+    "Győr, Baross út 1": {"lat": 47.686, "lng": 17.635},
 }
 
 # Geocoding function
 def geocode_address(address):
-    '''Convert address to coordinates using mock data or Nominatim'''
-    # Try mock database first
+    '''Convert address to coordinates'''
     if address in MOCK_ADDRESSES:
         coords = MOCK_ADDRESSES[address]
         return {
@@ -91,11 +150,8 @@ def geocode_address(address):
             "method": "mock"
         }
     
-    # Try real geocoding
     try:
         geolocator = Nominatim(user_agent="hungary_zone_lookup_poc")
-        
-        # Try full address
         location = geolocator.geocode(f"{address}, Hungary", timeout=10)
         
         if location:
@@ -107,7 +163,7 @@ def geocode_address(address):
                 "method": "exact"
             }
         
-        # Fallback: try city only
+        # Fallback: city only
         city = address.split(",")[0].strip()
         location = geolocator.geocode(f"{city}, Hungary", timeout=10)
         
@@ -121,16 +177,10 @@ def geocode_address(address):
                 "note": f"Street not found, using {city} city center"
             }
         
-        return {
-            "success": False,
-            "error": "Address not found"
-        }
+        return {"success": False, "error": "Address not found"}
     
     except Exception as e:
-        return {
-            "success": False,
-            "error": f"Geocoding error: {str(e)}"
-        }
+        return {"success": False, "error": f"Geocoding error: {str(e)}"}
 
 # Initialize session state
 if "submissions" not in st.session_state:
@@ -138,29 +188,24 @@ if "submissions" not in st.session_state:
 
 # Main UI
 st.title("🗺️ Hungary Zone Lookup System")
-st.markdown("### Proof of Concept - Automatic Zone Detection")
+st.markdown("### Proof of Concept - Hierarchical Zone Detection")
 
-# Load zone data
-zones_data = load_zone_data()
+# Load data
+all_data = load_all_data()
 
-if zones_data is None:
+if all_data['zones'] is None:
+    st.error("❌ Cannot load technical zones!")
     st.stop()
 
-# Create layout
+# Layout
 col1, col2 = st.columns([2, 1])
 
 with col1:
     st.header("📝 Submission Form")
     
     with st.form("submission_form", clear_on_submit=True):
-        # Name
-        name = st.text_input(
-            "Name *",
-            placeholder="Enter your name",
-            help="Required field"
-        )
+        name = st.text_input("Name *", placeholder="Enter your name")
         
-        # Address selection
         st.subheader("Address")
         address_mode = st.radio(
             "Choose input method:",
@@ -169,58 +214,36 @@ with col1:
         )
         
         if address_mode == "Use demo address":
-            address = st.selectbox(
-                "Select demo address:",
-                list(MOCK_ADDRESSES.keys())
-            )
+            address = st.selectbox("Select demo address:", list(MOCK_ADDRESSES.keys()))
         else:
-            address = st.text_input(
-                "Enter address:",
-                placeholder="e.g., Budapest, Andrássy út 1",
-                help="City, Street name format works best"
-            )
+            address = st.text_input("Enter address:", placeholder="e.g., Budapest, Andrássy út 1")
         
-        # Zone display (read-only, will be filled after detection)
-        zone_detected = st.empty()
-        
-        # Other fields
         product = st.text_input("Product", placeholder="Product name (optional)")
         reason = st.text_area("Reason", placeholder="Reason for submission (optional)")
         submission_date = st.date_input("Date", value=date.today())
         
-        # Submit button
         col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
         with col_btn2:
-            submitted = st.form_submit_button(
-                "🔍 Find Zone & Submit",
-                use_container_width=True,
-                type="primary"
-            )
+            submitted = st.form_submit_button("🔍 Find Zone & Submit", use_container_width=True, type="primary")
     
-    # Handle form submission
     if submitted:
-        if not name:
-            st.error("❌ Please enter your name!")
-        elif not address:
-            st.error("❌ Please enter an address!")
+        if not name or not address:
+            st.error("❌ Please fill in Name and Address!")
         else:
-            # Geocode address
             with st.spinner("🔍 Geocoding address..."):
                 geo_result = geocode_address(address)
             
             if not geo_result["success"]:
-                st.error(f"❌ {geo_result.get('error', 'Could not find address')}")
+                st.error(f"❌ {geo_result.get('error')}")
             else:
-                # Find zone
-                with st.spinner("📍 Detecting zone..."):
-                    zone_result = find_zone_for_point(
-                        geo_result["lat"],
-                        geo_result["lng"],
-                        zones_data
-                    )
-                    time.sleep(0.5)  # Small delay for better UX
+                # Find location hierarchy
+                region_result = find_region_for_point(geo_result["lat"], geo_result["lng"], all_data['regions'])
+                branch_result = find_branch_for_point(geo_result["lat"], geo_result["lng"], all_data['branches'])
                 
-                # Create submission record
+                with st.spinner("📍 Detecting zone..."):
+                    zone_result = find_zone_for_point(geo_result["lat"], geo_result["lng"], all_data['zones'])
+                
+                # Create submission
                 submission = {
                     "timestamp": pd.Timestamp.now(),
                     "name": name,
@@ -228,47 +251,58 @@ with col1:
                     "formatted_address": geo_result["formatted_address"],
                     "latitude": round(geo_result["lat"], 6),
                     "longitude": round(geo_result["lng"], 6),
+                    "region_id": region_result["region_id"] if region_result else "N/A",
+                    "region_name": region_result["region_name"] if region_result else (zone_result.get("region_name") or "N/A"),
+                    "branch_id": branch_result["branch_id"] if branch_result else "N/A",
+                    "branch_name": branch_result["branch_name"] if branch_result else "N/A",
                     "zone_id": zone_result["zone_id"],
                     "zone_name": zone_result["zone_name"],
-                    "basis_id": zone_result["basis_id"],
+                    "status": zone_result.get("status", "N/A"),
+                    "created_by": zone_result.get("created_by", "N/A"),
                     "detection_method": zone_result["method"],
                     "confidence": zone_result["confidence"],
                     "distance_km": zone_result.get("distance_km", 0),
-                    "product": product if product else "N/A",
-                    "reason": reason if reason else "N/A",
+                    "product": product or "N/A",
+                    "reason": reason or "N/A",
                     "date": str(submission_date)
                 }
                 
-                # Save to session
                 st.session_state.submissions.append(submission)
-                
-                # Display success
                 st.success("✅ Submission saved successfully!")
                 
-                # Show zone detection results
+                # Display results
                 st.markdown("---")
-                st.subheader("📊 Zone Detection Results")
+                st.subheader("📊 Location Detection Results")
                 
                 result_col1, result_col2, result_col3 = st.columns(3)
                 
                 with result_col1:
-                    st.metric("Zone ID", zone_result["zone_id"])
-                with result_col2:
-                    st.metric("Zone Name", zone_result["zone_name"])
-                with result_col3:
-                    st.metric("Basis ID", zone_result["basis_id"])
+                    st.markdown("**🌍 Region**")
+                    if region_result:
+                        st.metric("Region ID", region_result["region_id"])
+                        st.metric("Region Name", region_result["region_name"])
+                    else:
+                        st.metric("Region Name", zone_result.get("region_name", "N/A"))
                 
+                with result_col2:
+                    st.markdown("**🏢 Branch**")
+                    if branch_result:
+                        st.metric("Branch ID", branch_result["branch_id"])
+                        st.metric("Branch Name", branch_result["branch_name"])
+                    else:
+                        st.info("Not detected")
+                
+                with result_col3:
+                    st.markdown("**📍 Technical Zone (Base)**")
+                    st.metric("Zone ID", zone_result["zone_id"])
+                    st.metric("Zone Name", zone_result["zone_name"])
+                    st.caption(f"Status: {zone_result.get('status', 'N/A')}")
+                
+                st.markdown("---")
                 if zone_result["method"] == "inside":
                     st.info("✅ Address is INSIDE this zone (High confidence)")
                 else:
-                    st.warning(
-                        f"⚠️ Address is OUTSIDE all zones\n\n"
-                        f"Nearest zone: **{zone_result['zone_name']}**\n\n"
-                        f"Distance: **{zone_result['distance_km']} km**"
-                    )
-                
-                if "note" in geo_result:
-                    st.info(f"ℹ️ {geo_result['note']}")
+                    st.warning(f"⚠️ Address is OUTSIDE all zones\n\nNearest zone: **{zone_result['zone_name']}**\n\nDistance: **{zone_result['distance_km']} km**")
 
 with col2:
     st.header("📊 Statistics")
@@ -276,47 +310,35 @@ with col2:
     if st.session_state.submissions:
         total = len(st.session_state.submissions)
         inside = sum(1 for s in st.session_state.submissions if s["detection_method"] == "inside")
-        outside = total - inside
         
         st.metric("Total Submissions", total)
         st.metric("Inside Zones", inside, delta=f"{(inside/total*100):.0f}%")
-        st.metric("Outside Zones", outside, delta=f"{(outside/total*100):.0f}%")
+        st.metric("Outside Zones", total - inside)
         
-        # Zone distribution
         if total > 0:
             st.markdown("---")
-            st.subheader("Zone Distribution")
-            zone_counts = {}
+            st.subheader("Region Distribution")
+            region_counts = {}
             for s in st.session_state.submissions:
-                zone = s["zone_name"]
-                zone_counts[zone] = zone_counts.get(zone, 0) + 1
+                region = s.get("region_name", "Unknown")
+                region_counts[region] = region_counts.get(region, 0) + 1
             
-            for zone, count in sorted(zone_counts.items(), key=lambda x: x[1], reverse=True):
-                st.text(f"{zone}: {count}")
+            for region, count in sorted(region_counts.items(), key=lambda x: x[1], reverse=True):
+                st.text(f"{region}: {count}")
     else:
-        st.info("No submissions yet\n\nFill the form to get started!")
+        st.info("No submissions yet")
 
 # Submissions table
 if st.session_state.submissions:
     st.markdown("---")
     st.header("📋 All Submissions")
     
-    # Create DataFrame
     df = pd.DataFrame(st.session_state.submissions)
     
-    # Display columns
-    display_cols = [
-        "name", "address", "zone_id", "zone_name", 
-        "detection_method", "product", "date"
-    ]
+    display_cols = ["name", "address", "region_name", "branch_name", "zone_name", "status", "detection_method", "date"]
     
-    st.dataframe(
-        df[display_cols],
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
     
-    # Export options
     col_export1, col_export2 = st.columns(2)
     
     with col_export1:
@@ -334,6 +356,5 @@ if st.session_state.submissions:
             st.session_state.submissions = []
             st.rerun()
 
-# Footer
 st.markdown("---")
-st.caption("🗺️ Hungary Zone Lookup System | Proof of Concept | Automatic zone detection based on address geocoding")
+st.caption("🗺️ Hungary Zone Lookup System | PoC | Region → Branch → Technical Zone (Base)")
