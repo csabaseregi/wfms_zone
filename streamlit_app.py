@@ -13,6 +13,22 @@ st.set_page_config(
     layout="wide"
 )
 
+# Load mock addresses from JSON file
+@st.cache_data
+def load_mock_addresses():
+    '''Load mock addresses from JSON file'''
+    try:
+        with open("mock_addresses_simple.json", "r", encoding="utf-8") as f:
+            addresses = json.load(f)
+            return addresses
+    except FileNotFoundError:
+        st.warning("⚠️ mock_addresses_simple.json not found, using fallback addresses")
+        # Fallback to a few default addresses
+        return {
+            "Debrecen, Piac utca 1": {"lat": 47.5316, "lng": 21.6273},
+            "Győr, Baross út 1": {"lat": 47.686, "lng": 17.635},
+        }
+
 # Load ALL GeoJSON files
 @st.cache_data
 def load_all_data():
@@ -92,7 +108,7 @@ def find_zone_for_point(lat, lng, zones_data):
         if polygon.contains(point):
             props = feature["properties"]
             return {
-                "zone_id": props.get("bázis_id") or props.get("zone_id"),  # Support both names
+                "zone_id": props.get("bázis_id") or props.get("zone_id"),
                 "zone_name": props.get("bázis_név") or props.get("zone_name"),
                 "region_name": props.get("Régió"),
                 "created_by": props.get("created_by"),
@@ -129,27 +145,21 @@ def find_zone_for_point(lat, lng, zones_data):
         "distance_km": round(distance_km, 2)
     }
 
-# Mock addresses for demos
-MOCK_ADDRESSES = {
-    "Debrecen, Piac utca 1": {"lat": 47.5316, "lng": 21.6273},
-    "Fertőd, Fő utca 1": {"lat": 47.622, "lng": 16.864},
-    "Csorna, Kossuth utca 5": {"lat": 47.612, "lng": 17.253},
-    "Győr, Baross út 1": {"lat": 47.686, "lng": 17.635},
-}
-
 # Geocoding function
-def geocode_address(address):
-    '''Convert address to coordinates'''
-    if address in MOCK_ADDRESSES:
-        coords = MOCK_ADDRESSES[address]
+def geocode_address(address, mock_addresses):
+    '''Convert address to coordinates using mock data or real geocoding'''
+    # Check mock database first
+    if address in mock_addresses:
+        coords = mock_addresses[address]
         return {
             "lat": coords["lat"],
             "lng": coords["lng"],
-            "formatted_address": address + ", Hungary (Demo)",
+            "formatted_address": address + " (Demo)",
             "success": True,
             "method": "mock"
         }
     
+    # Try real geocoding
     try:
         geolocator = Nominatim(user_agent="hungary_zone_lookup_poc")
         location = geolocator.geocode(f"{address}, Hungary", timeout=10)
@@ -186,12 +196,13 @@ def geocode_address(address):
 if "submissions" not in st.session_state:
     st.session_state.submissions = []
 
+# Load data
+mock_addresses = load_mock_addresses()
+all_data = load_all_data()
+
 # Main UI
 st.title("🗺️ Hungary Zone Lookup System")
-st.markdown("### Proof of Concept - Hierarchical Zone Detection")
-
-# Load data
-all_data = load_all_data()
+st.markdown(f"### Proof of Concept | {len(mock_addresses)} Demo Addresses Available")
 
 if all_data['zones'] is None:
     st.error("❌ Cannot load technical zones!")
@@ -207,6 +218,10 @@ with col1:
         name = st.text_input("Name *", placeholder="Enter your name")
         
         st.subheader("Address")
+        
+        # Show info about available addresses
+        st.info(f"ℹ️ {len(mock_addresses)} demo addresses available covering all zones")
+        
         address_mode = st.radio(
             "Choose input method:",
             ["Use demo address", "Enter custom address"],
@@ -214,9 +229,17 @@ with col1:
         )
         
         if address_mode == "Use demo address":
-            address = st.selectbox("Select demo address:", list(MOCK_ADDRESSES.keys()))
+            # Create searchable selectbox with all mock addresses
+            address = st.selectbox(
+                "Select or search demo address:",
+                options=sorted(mock_addresses.keys()),
+                help="Type to search addresses"
+            )
         else:
-            address = st.text_input("Enter address:", placeholder="e.g., Budapest, Andrássy út 1")
+            address = st.text_input(
+                "Enter address:",
+                placeholder="e.g., Budapest, Andrássy út 1"
+            )
         
         product = st.text_input("Product", placeholder="Product name (optional)")
         reason = st.text_area("Reason", placeholder="Reason for submission (optional)")
@@ -224,24 +247,34 @@ with col1:
         
         col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
         with col_btn2:
-            submitted = st.form_submit_button("🔍 Find Zone & Submit", use_container_width=True, type="primary")
+            submitted = st.form_submit_button(
+                "🔍 Find Zone & Submit",
+                use_container_width=True,
+                type="primary"
+            )
     
     if submitted:
         if not name or not address:
             st.error("❌ Please fill in Name and Address!")
         else:
-            with st.spinner("🔍 Geocoding address..."):
-                geo_result = geocode_address(address)
+            with st.spinner("🔍 Processing..."):
+                geo_result = geocode_address(address, mock_addresses)
             
             if not geo_result["success"]:
                 st.error(f"❌ {geo_result.get('error')}")
             else:
                 # Find location hierarchy
-                region_result = find_region_for_point(geo_result["lat"], geo_result["lng"], all_data['regions'])
-                branch_result = find_branch_for_point(geo_result["lat"], geo_result["lng"], all_data['branches'])
+                region_result = find_region_for_point(
+                    geo_result["lat"], geo_result["lng"], all_data['regions']
+                )
+                branch_result = find_branch_for_point(
+                    geo_result["lat"], geo_result["lng"], all_data['branches']
+                )
                 
                 with st.spinner("📍 Detecting zone..."):
-                    zone_result = find_zone_for_point(geo_result["lat"], geo_result["lng"], all_data['zones'])
+                    zone_result = find_zone_for_point(
+                        geo_result["lat"], geo_result["lng"], all_data['zones']
+                    )
                 
                 # Create submission
                 submission = {
@@ -303,6 +336,9 @@ with col1:
                     st.info("✅ Address is INSIDE this zone (High confidence)")
                 else:
                     st.warning(f"⚠️ Address is OUTSIDE all zones\n\nNearest zone: **{zone_result['zone_name']}**\n\nDistance: **{zone_result['distance_km']} km**")
+                
+                if "note" in geo_result:
+                    st.info(f"ℹ️ {geo_result['note']}")
 
 with col2:
     st.header("📊 Statistics")
@@ -326,7 +362,7 @@ with col2:
             for region, count in sorted(region_counts.items(), key=lambda x: x[1], reverse=True):
                 st.text(f"{region}: {count}")
     else:
-        st.info("No submissions yet")
+        st.info("No submissions yet\n\nFill the form to get started!")
 
 # Submissions table
 if st.session_state.submissions:
